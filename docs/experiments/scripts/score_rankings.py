@@ -6,7 +6,7 @@ Usage:
 
 Reads RUN_DIR/ranking.json (owner, from rank_server.py) and
 RUN_DIR/ranking-orchestrator.json (same format). Only tasks with status
-"ranked" count. Combined rank per task = (2 * owner rank + orchestrator rank) / 3;
+"ranked" count, and a task the owner marked "tie" is skipped entirely. Combined rank per task = (2 * owner rank + orchestrator rank) / 3;
 the owner weighs double because aesthetics are subjective and the owner
 grades last. Prints a Markdown table: per-task combined rank, then the mean.
 """
@@ -25,10 +25,17 @@ def load(path):
             if isinstance(entry, dict) and entry.get("status") == "ranked"}
 
 
+def owner_ties(run_dir):
+    path = run_dir / "ranking.json"
+    data = json.loads(path.read_text()) if path.exists() else {}
+    return {task for task, entry in data.items() if isinstance(entry, dict) and entry.get("status") == "tie"}
+
+
 def main():
     run_dir = Path(sys.argv[1])
     rankings = {name: load(run_dir / name) for name in WEIGHTS}
-    tasks = sorted(set().union(*rankings.values()))
+    # The owner grades last: a task the owner marked "tie" is not scored at all.
+    tasks = sorted(set().union(*rankings.values()) - owner_ties(run_dir))
     models = sorted({m for r in rankings.values() for order in r.values() for m in order})
     combined = {m: {} for m in models}
     for task in tasks:

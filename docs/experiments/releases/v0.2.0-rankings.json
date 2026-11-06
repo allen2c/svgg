@@ -1,0 +1,96 @@
+{
+  "owner": {
+    "animate-windmill-scene": {
+      "status": "tie",
+      "order": []
+    },
+    "create-camera-outline-icon": {
+      "status": "tie",
+      "order": []
+    },
+    "create-night-fox-mascot-badge": {
+      "status": "ranked",
+      "order": [
+        "claude-opus",
+        "claude-sonnet",
+        "deepseek-v4.1-flash",
+        "claude-haiku",
+        "gpt-6-luna"
+      ]
+    },
+    "edit-windmill-scene-to-winter": {
+      "status": "tie",
+      "order": []
+    },
+    "reference-sunset-sailboat-tile": {
+      "status": "tie",
+      "order": []
+    },
+    "vectorize-marshall-point-lighthouse": {
+      "status": "ranked",
+      "order": [
+        "claude-opus",
+        "claude-sonnet",
+        "gpt-6-luna",
+        "deepseek-v4.1-flash",
+        "claude-haiku"
+      ]
+    }
+  },
+  "orchestrator": {
+    "create-camera-outline-icon": {
+      "status": "ranked",
+      "order": [
+        "claude-opus",
+        "claude-haiku",
+        "gpt-6-luna",
+        "deepseek-v4.1-flash",
+        "claude-sonnet"
+      ]
+    },
+    "create-night-fox-mascot-badge": {
+      "status": "ranked",
+      "order": [
+        "claude-opus",
+        "claude-sonnet",
+        "deepseek-v4.1-flash",
+        "claude-haiku",
+        "gpt-6-luna"
+      ]
+    },
+    "vectorize-marshall-point-lighthouse": {
+      "status": "ranked",
+      "order": [
+        "claude-haiku",
+        "claude-opus",
+        "deepseek-v4.1-flash",
+        "claude-sonnet",
+        "gpt-6-luna"
+      ]
+    },
+    "reference-sunset-sailboat-tile": {
+      "status": "ranked",
+      "order": [
+        "deepseek-v4.1-flash",
+        "claude-opus",
+        "gpt-6-luna",
+        "claude-sonnet",
+        "claude-haiku"
+      ]
+    },
+    "edit-windmill-scene-to-winter": {
+      "status": "ranked",
+      "order": [
+        "claude-haiku",
+        "claude-opus",
+        "deepseek-v4.1-flash",
+        "claude-sonnet",
+        "gpt-6-luna"
+      ]
+    },
+    "animate-windmill-scene": {
+      "status": "tie",
+      "order": []
+    }
+  }
+}

@@ -1,76 +1,89 @@
 ---
 name: svgg
-description: Draw, vectorize, edit, and animate clean, editable SVG directly as text. Use when asked for an icon, logo, illustration, badge, diagram-like graphic, or animation as SVG, when turning a reference image into vector art, or when changing or animating an existing SVG. Works in any agent: with or without file, image, or shell tools.
+description: Draw, vectorize, edit, and animate clean, editable SVG directly as text. Use when asked for an icon, logo, badge, app tile, illustration, scene, or animation as SVG, when turning a reference image into vector art, or when changing or animating an existing SVG. Works in any agent, with or without file, image, or shell tools.
 metadata:
-  version: 0.1.0
+  version: 0.2.0
 ---
 
 # SVG Drawing
 
 You write the SVG yourself, as source code. No image model, no tracing
-library. The output is a file a designer could open and keep editing: few
+library. The result is a file a designer could open and keep editing: few
 shapes, named groups, a real `viewBox`, no junk.
 
-Pick the **mode**, write the **brief**, **plan**, **draw**, **check**,
-then **deliver**. Do not skip the brief and the plan. Most bad SVGs come
-from drawing before deciding on the composition.
+Steps: pick the **mode** and **asset type**, write the **brief**, **plan**,
+**draw**, **check**, **deliver**. Most bad SVGs come from drawing before
+deciding what makes the subject recognizable and where everything goes.
 
-## 1. Modes
+## 1. Mode and asset type
 
 | Mode | Input | Output |
 | --- | --- | --- |
 | `create` | Text request | New SVG |
 | `reference` | Text plus 1–14 images or SVGs | New SVG that borrows named traits from each reference |
 | `vectorize` | One raster image | SVG that reproduces the image as flat vector shapes |
-| `edit` | Existing SVG plus a change | Same SVG with only that change |
-| `animate` | Existing SVG plus a motion request | Same SVG with CSS animation on its existing groups |
+| `edit` | Existing SVG plus changes | The same SVG with only those changes and their necessary side effects |
+| `animate` | Existing SVG plus a motion request | The same SVG with CSS animation on its groups |
 
-If the request mixes modes (for example "vectorize this and then animate
-it"), run them in order and keep each step's output.
+Requests that mix modes ("vectorize, then animate") run in order.
+
+Asset type sets the defaults. Use the row that fits; the request overrides it.
+
+| Asset type | Typical viewBox | Background | Margin | Colors | Text |
+| --- | --- | --- | --- | --- | --- |
+| UI icon | `0 0 24 24` | none | 2 units: art spans x and y 2–22 | 1 (`currentColor`) | never |
+| Logo or mark | `0 0 256 256` | none | 8% | 1–3 | only if asked |
+| Badge, sticker, app tile | `0 0 512 512` | the badge or tile shape itself fills the viewBox | content 8% inside the shape | 3–6 | if asked |
+| Illustration or scene | `0 0 W H` of the target | full bleed | none for background, 4% for subject | 6–16 | if asked |
 
 ## 2. Brief
 
-Restate the request as this brief before drawing. Fill unknowns with
-sensible defaults and say which ones you assumed. Do not ask questions
-unless the subject itself is unclear.
+Restate the request before drawing. Small assets (icons, marks) need only
+the first three lines.
 
 ```text
-Subject:      what is drawn
-Use and size: where it is shown and at what size (e.g. 24 px UI icon, 512 px app tile)
-viewBox:      e.g. 0 0 24 24 for icons, 0 0 512 512 for tiles, 0 0 W H for scenes
-Style:        flat | outline | duotone | geometric | line-art | isometric | ...
-Palette:      3–6 hex colors, named by role (ink, fill, accent, background)
-Composition:  layout, focal point, margins
-Must include: required elements and exact text
-Avoid:        what must not appear
+Subject and asset type:  what is drawn, which row of the table
+Use and size:            where it is shown, display size, viewBox
+Identity cues:           3–5 features that make the subject recognizable at a glance
+Style and palette:       flat | outline | duotone | ...; hex colors named by role
+Composition:             layout, focal point, proportions
+Must include / avoid:    required elements and exact text; what must not appear
 ```
 
-Defaults when unstated: flat style, transparent background, 4–5 colors,
-safe margin of 8% of the viewBox on every side, no text.
+**Identity cues** are the most important line. Write what a viewer needs to
+see to name the subject instantly: for a fox, "pointed snout, tall
+triangular ears, white chest and cheeks, large bushy tail with a white tip";
+for a lighthouse, "tall white tower, dark lantern room with a railing".
+Every cue must be visible in the final drawing.
 
-For `reference` mode, give **each reference one role** and write it into
-the brief, for example: `ref 1 → silhouette`, `ref 2 → palette`,
-`ref 3 → line weight`. State what to **preserve** and what to **change**.
-If you cannot see images, ask for a text description of each reference.
+For `reference` mode, give **each reference one role** (`ref 1 → palette`,
+`ref 2 → silhouette`) and state what to preserve and what to change. A
+palette role means: take 3–8 colors from the reference; if a needed color
+is missing (e.g. water), derive it from the reference colors (mix or shift
+lightness) and say so. If you cannot see images, ask for a description.
+
+Fill unknowns with the table defaults. Ask a question only if the subject
+itself is unclear.
 
 ## 3. Plan
 
-Write a short plan, not code yet:
+Think it through before writing code (in your reasoning or in a draft; it
+does not need to appear in the final answer):
 
-1. **Coordinate grid.** Name key coordinates: center, baseline, horizon,
-   left and right edges of the subject. Snap them to whole numbers
-   (icons: 0.5 or 1 unit; larger art: 1–4 units).
-2. **Layers, back to front.** List the groups you will draw, each with a
-   kebab-case id, e.g. `background`, `body`, `head`, `details`, `text`.
-   Things that might be animated or edited later get their own group.
-3. **Shape choice per part.** Prefer primitives: `rect` (with `rx`),
-   `circle`, `ellipse`, `line`, `polyline`, `polygon`, `text`. Use `path`
-   only for curves or outlines primitives cannot make.
-4. **Palette mapping.** Which part gets which color role.
+1. **Grid and proportions.** Name key coordinates as whole numbers: center,
+   baseline, horizon, the subject's bounding box. For `vectorize` and
+   `reference` silhouettes, measure the source as fractions of width and
+   height (e.g. horizon at 0.62 H, tower from 0.43 W to 0.52 W) and convert.
+2. **Layers, back to front.** List groups with kebab-case ids
+   (`background`, `hills`, `body`, `head`, `text`). Anything that may later
+   move or change gets its own group.
+3. **Shape per part.** Primitives first: `rect` (with `rx`), `circle`,
+   `ellipse`, `line`, `polyline`, `polygon`, `text`. Use `path` for organic
+   outlines, with smooth `C`/`Q`/`A` segments, not dozens of short `L` steps.
+   See the recipes in section 6.
+4. **Palette mapping.** Which part gets which color.
 
 ## 4. Draw
-
-Write the SVG following these rules.
 
 **Root**
 
@@ -82,123 +95,179 @@ Write the SVG following these rules.
 </svg>
 ```
 
-- Always set `viewBox`. Set `width` and `height` to the intended display
-  size. Everything visible stays inside the viewBox.
-- Put shared colors in a `<style>` block with classes, or use `fill` and
-  `stroke` attributes; never mix many one-off inline `style=""` strings.
-- `<defs>` only for things used more than once or gradients you really
-  need. Every `id` is unique and descriptive.
+- Always a `viewBox`; `width`/`height` at the display size. Everything
+  visible stays inside the viewBox.
+- Colors: either a `<style>` block with classes (preferred when a color is
+  used by 3+ shapes) or `fill`/`stroke` attributes. Not many inline
+  `style=""` strings.
+- `<defs>` for gradients, masks, and clip paths; a clip path used once is
+  fine (e.g. clipping a scene to a rounded tile). Ids unique and descriptive.
 
 **Geometry**
 
-- Fewest nodes that hold the shape. A circle is `<circle>`, not a 40-point
-  path. A smooth curve uses 2–4 cubic or quadratic segments, not dozens of
-  short lines.
-- Round coordinates: at most one decimal place; integers for icons when
-  possible.
-- Closed shapes end with `Z`. No zero-length segments, no duplicate
-  consecutive points, no shapes hidden fully under other shapes.
-- Symmetric subjects: draw one half in a group and mirror it with
-  `transform="matrix(-1 0 0 1 W 0)"` or compute mirrored coordinates
-  exactly. Do not eyeball symmetry.
-- Draw back to front. Overlap shapes on purpose to avoid hairline gaps
-  between adjacent fills.
+- Fewest nodes that hold the shape. A circle is a `<circle>`. One organic
+  outline rarely needs more than 12 segments.
+- Coordinates: at most one decimal; integers for icons where possible.
+- Closed shapes end with `Z`. No zero-length segments, no duplicate points,
+  no shapes fully hidden under others.
+- Symmetry: compute mirrored coordinates exactly (x' = W − x) or mirror a
+  group with `transform="matrix(-1 0 0 1 W 0)"`.
+- Draw back to front and overlap neighbors slightly so no hairline gaps show.
+  Do not cut holes through one layer while leaving the layers below
+  unchanged; draw the hole's content on top instead.
+
+**Natural textures** (clouds, rocks, foliage, waves, fur): draw a few
+irregular shapes that differ in size and outline (3–9 per area), not one
+shape repeated in a row or a tiled wave pattern. Two tones per material
+(base plus shadow or highlight) are enough.
 
 **Style**
 
-- Outline icons: one stroke width for the whole icon (24 px icons: 1.5 or
-  2), `stroke-linecap="round"`, `stroke-linejoin="round"`, `fill="none"`.
+- Outline icons: one stroke width (24 px: 2), `stroke-linecap="round"`,
+  `stroke-linejoin="round"`, `fill="none"` on the root. Inner lines must
+  not cross outlines they should stop at: a camera's top bump is one
+  outline with the body, not a separate box drawn across it.
 - Flat art: solid fills, at most 2 gradients, no filters unless asked.
-  Shadows are flat darker shapes, not blurs.
-- Text: only when requested, with the exact wording. Use a generic family
-  stack (`font-family="system-ui, sans-serif"`), `text-anchor="middle"`
-  for centered text, and keep it legible at the target size.
+  Shadows are flat darker shapes.
+- Text: only when asked, exact wording, `font-family="system-ui, sans-serif"`,
+  `text-anchor="middle"` for centered text, legible at display size.
 
 **Forbidden**
 
 `<script>`, `on*=` event attributes, `<foreignObject>`, external
-`href`/`xlink:href` URLs, embedded raster `<image>` (unless the user asks),
-editor metadata (`sodipodi`, `inkscape`, comments with timestamps).
+`href`/`xlink:href` URLs, embedded raster `<image>` (unless asked), editor
+metadata (`sodipodi`, `inkscape`, timestamp comments).
 
-## 5. Mode-specific rules
+## 5. Mode rules
 
 **vectorize**
 
-- Reduce the image to 4–10 flat color regions; sample the hex colors from
-  the image (or estimate them carefully if you cannot sample).
-- Keep the large silhouettes and the composition proportions (measure
-  them as fractions of the width and height). Drop texture and noise.
-- One group per region of meaning (`sky`, `ground`, `building`, ...).
+- Keep the composition: measured proportions from the plan, same horizon,
+  same subject position and size.
+- Colors: 6–16 for a scene. Average a small patch when you can read pixels
+  (e.g. `magick img.jpg -crop 16x16+X+Y -resize 1x1 txt:`); otherwise
+  estimate carefully. Keep the photo's most saturated region (e.g. blue sky)
+  visibly saturated.
+- Plan color bands top to bottom with their y ranges before drawing.
+- Drop noise and texture below about 1/60 of the width. One group per
+  region of meaning (`sky`, `clouds`, `sea`, `trees`, `lighthouse`, `rocks`).
 
 **edit**
 
-- Change only what was asked. Copy every untouched element byte for byte;
-  keep ids, order, and the viewBox.
-- After the SVG, list what changed in one or two lines.
+- **Never modify the input file.** Copy it to the output path first and edit
+  the copy (or write a new file).
+- Make the requested changes. Also make the changes they force (text color
+  for contrast on a new background, the `<title>`, classes that became
+  unused, a renamed id for a replaced part such as `sun` → `moon`) and
+  report each one.
+- Everything else stays as it was: element order, ids, coordinates,
+  viewBox, styles.
+- To move a group, add or adjust a `transform="translate(dx dy)"` on the
+  group rather than rewriting every coordinate. Anything added to a moved
+  part goes inside the same group.
 
 **animate**
 
-- Animate the groups that already exist. If a part that must move is not
-  in its own group, first wrap it in a `<g id="...">` without changing
-  any coordinates, then animate that group.
-- Use CSS `@keyframes` in the SVG's `<style>`, animating `transform` and
-  `opacity` only. Set `transform-box: fill-box; transform-origin: center;`
-  (or an explicit origin) on rotating or scaling groups.
-- State duration, easing, and looping in the CSS. Loops must be seamless
-  (the last keyframe equals the first).
+- Animate the existing groups. If a moving part has no group of its own,
+  wrap it in `<g id="...">` without changing its coordinates.
+- CSS `@keyframes` inside the SVG's `<style>`. Animate `transform` and
+  `opacity`; `stroke-dashoffset` only for line-drawing effects.
+- **Pivot.** When the pivot is a known point (hub, hinge, pole), use
+  `transform-box: view-box; transform-origin: Xpx Ypx;` with that point in
+  viewBox units. Use `transform-box: fill-box` only when the pivot is the
+  exact center of the group's bounding box.
+- **Anchored scale or skew** (a flag at its pole): pivot at the anchored
+  edge, same rule.
+- **First frame equals the input.** The 0% keyframe is the rest pose (0°,
+  0 px, scale 1). "Moves 10 px and back" means 0 → 10 → 0.
+- Seamless loops: the last keyframe equals the first, or use
+  `animation-direction: alternate`.
+- Phase offsets: use a negative `animation-delay` (half a cycle =
+  `-duration/2`) only if the request allows the first frame to differ;
+  otherwise use a positive delay or write the offset into the keyframes so
+  frame 0 is still the rest pose.
 - Add `@media (prefers-reduced-motion: reduce) { * { animation: none; } }`.
-- The first frame (and the reduced-motion version) must look complete.
+- State your interpretation of any ambiguous amount in the report.
 
-## 6. Check
+## 6. Recipes
 
-Before delivering, check the SVG against this list. Fix and redraw any
-failure; at most two repair rounds.
+- **Dot in a stroke icon:** a filled circle, `r` = stroke width / 2 to
+  stroke width, `fill="currentColor" stroke="none"`.
+- **Crescent:** one path, two arcs between the intersection points of an
+  outer and an inner circle. Outer (50, 50) r 30, inner (62, 42) r 26:
+  `M48 20.1 A30 30 0 1 0 76.9 63.3 A26 26 0 0 1 48 20.1 Z`. Scale and move
+  it with a group transform. Alternative: a `<mask>` with a black inner circle.
+- **Four-point star:** `polygon` with 8 points alternating outer radius R
+  and inner radius 0.35 R, starting at the top.
+- **Cloud:** a rounded `rect` base (`rx` = height / 2) plus 2–3 circles of
+  different radii on top, all the same fill.
+- **Text inside a circle** of radius r: a straight line at distance d from
+  the center has room for width 2·√(r² − d²); keep text under 80% of that.
+- **Rounded tile:** `rect` with `rx` ≈ 22% of the side; clip the scene to it
+  with a `clipPath`.
+- **Rotations:** for parts arranged around a center (blades, rays, petals),
+  draw one part pointing up and repeat it with `transform="rotate(A cx cy)"`.
 
-1. **Valid XML**, root has `xmlns` and `viewBox`, all ids unique.
-2. **Nothing forbidden** from section 4.
-3. **Inside the frame**: every shape within the viewBox and margins.
-4. **Silhouette**: the subject reads correctly as a solid shape at the
-   final size.
-5. **Geometry**: aligned to the grid, symmetric where it should be, no
-   stray or hidden shapes, no hairline gaps.
-6. **Prompt adherence**: every "must include" item is present, every
-   "avoid" item absent, the palette matches.
-7. **Legibility at final size**: details smaller than about 1/24 of the
-   viewBox are removed or merged (for 24 px icons, nothing thinner than
-   1 unit).
-8. **Structure**: named groups, primitives where possible, nothing a
+## 7. Check
+
+Check the SVG, fix, and check again; at most two repair rounds. If a
+problem remains, deliver anyway and name it in the report.
+
+1. **Valid**: well-formed XML, `xmlns`, `viewBox`, unique ids, nothing forbidden.
+2. **Frame**: every shape inside the viewBox and margins.
+3. **Identity**: every identity cue is visible; the silhouette alone names
+   the subject.
+4. **Geometry**: grid-aligned, symmetric where intended, no stray, hidden,
+   or crossing lines, no gaps, no repeated-pattern textures.
+5. **Adherence**: every must-include present, every avoid absent, palette
+   and composition as briefed; for `vectorize` and `reference`, compare
+   proportions with the source.
+6. **Legibility at display size**: details under about 1/24 of the viewBox
+   removed or merged; text readable; foreground contrasts with background.
+7. **Structure**: named groups, primitives where possible, nothing a
    designer would have to clean up.
+8. **Edit / animate**: input untouched; only requested and reported changes;
+   first frame equals the input; pivots correct.
 
-If you can run tools, use them:
+With tools, verify rather than guess:
 
 - Validate: `xmllint --noout file.svg` or any XML parser.
-- Render: `rsvg-convert -w 512 file.svg -o file.png`, or
-  `magick file.svg file.png`, or a headless browser. **Look at the PNG**
-  if you can view images, and judge items 3–7 from the picture, not from
-  the code. Also render at the final display size (e.g. 24 px) for icons.
-- Optimize only if asked; never let an optimizer remove ids or groups.
+- Render: `rsvg-convert -w 512 file.svg -o file.png` (or `magick`, or a
+  headless browser) and **look at the PNG** if you can view images. Render
+  icons also at display size, then enlarge that render to judge it.
+- Compare with the source: render at the source's size and view both.
+- Motion: a static renderer shows only frame 0. In a headless browser,
+  freeze a moment with `animation-play-state: paused` plus a negative
+  `animation-delay` (e.g. `-2s`) and screenshot 2–3 moments. Without one,
+  trace each keyframe's transform by hand for one point of each moving group.
 
-If you cannot run tools, check the list by reading the code carefully,
-especially coordinates against the viewBox.
+Without tools, check each item by reading the code, coordinates against the
+viewBox first.
 
-## 7. Deliver
+## 8. Deliver
 
-- If you can write files, save to the path the user gave, or to a
-  descriptive kebab-case name such as `cloud-upload-icon.svg`.
-- Otherwise output the SVG in a single fenced ```svg block. Only one
-  final SVG per requested asset; no partial drafts in the final answer.
-- After the SVG, give at most 5 lines: the brief's assumed defaults,
-  the groups (for later edits or animation), and any check you could not
-  run.
+- Save to the path the user gave, else to a descriptive kebab-case name
+  (`camera-outline-icon.svg`). Without file tools, output the SVG in one
+  fenced `svg` block. One final SVG per asset, no drafts.
+- Then the report, at most 8 lines:
 
-## 8. Example
+```text
+file:     path (or "inline")
+type:     mode, asset type, viewBox
+assumed:  defaults or interpretations you chose
+groups:   ids of the top-level groups
+changes:  edit/animate only: each change, including forced side effects
+checks:   rendered yes/no, viewed yes/no, repair rounds N, open issues or "none"
+```
+
+## 9. Example
 
 Request: "a 24 px outline icon of a cloud with an upload arrow".
 
 ```text
-Subject: cloud with upward arrow   Use and size: UI icon, 24 px
-viewBox: 0 0 24 24   Style: outline, stroke 2, round caps
-Palette: ink currentColor   Must include: cloud, arrow up   Avoid: fill
+Subject and asset type: cloud with upward arrow, UI icon
+Use and size: toolbar, 24 px, viewBox 0 0 24 24
+Identity cues: cloud with bumpy top and flat bottom; arrow up through its middle
 ```
 
 ```svg

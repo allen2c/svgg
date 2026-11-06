@@ -26,6 +26,8 @@ SOURCES = {  # task -> source image shown on the left, relative to the repo
     "reference-sunset-sailboat-tile": "tmp/refs/lighthouse-cape-may.jpg",
     "edit-weather-card-to-night": "docs/experiments/fixtures/weather-card.svg",
     "animate-weather-card": "docs/experiments/fixtures/weather-card.svg",
+    "edit-windmill-scene-to-winter": "docs/experiments/fixtures/windmill-scene.svg",
+    "animate-windmill-scene": "docs/experiments/fixtures/windmill-scene.svg",
 }
 
 PAGE = """<!doctype html><html><head><meta charset="utf-8">
@@ -100,8 +102,11 @@ def build_data(run_dir):
     saved = json.loads(ranking_file.read_text()) if ranking_file.exists() else {}
     models = sorted(p.name for p in run_dir.iterdir() if p.is_dir())
     tasks = []
-    for task_file in sorted(TASKS_DIR.glob("*.md")):
+    task_files = sorted(TASKS_DIR.glob("*.md")) + sorted(TASKS_DIR.glob("retired/*.md"))
+    for task_file in task_files:
         task = task_file.stem
+        if not any((run_dir / m / f"{task}.svg").exists() for m in models):
+            continue  # task not run in this iteration
         text = task_file.read_text()
         prompt = text.split(f"Task ({task}):", 1)[-1].split("Save the final SVG", 1)[0].strip()
         entry = saved.get(task, {})

@@ -41,6 +41,10 @@ python3 -I docs/experiments/scripts/svg_check.py $RUN --render
 python3 -I docs/experiments/scripts/rank_server.py $RUN   # http://127.0.0.1:8765/
 # Combined score: owner x2 + orchestrator x1 ($RUN/ranking-orchestrator.json, same format)
 python3 -I docs/experiments/scripts/score_rankings.py $RUN
+# Animation frames at chosen seconds (headless Chrome)
+python3 -I docs/experiments/scripts/capture_frames.py $RUN/<model>/<task>.svg 0 1 2 --out tmp/frames/<model>
+# Prompts for hand-driven models (Claude subagents)
+docs/experiments/scripts/prepare_prompts.sh $RUN claude-opus
 ```
 
 ## Acceptance
@@ -56,5 +60,5 @@ Two stages:
    prompt adherence, legibility at final size). The orchestrating agent ranks
    from the renders; the owner ranks blind on `rank_server.py`. Aesthetics
    are subjective, so both count: combined rank = (2 × owner + 1 ×
-   orchestrator) / 3 (`score_rankings.py`). Tasks marked `tie` are not scored
-   and flag a task that needs to be made harder.
+   orchestrator) / 3 (`score_rankings.py`). Tasks the owner marks `tie` are
+   not scored and flag a task that needs to be made harder or retired.

@@ -6,7 +6,7 @@
 set -u
 model=$1; tag=$2; run_dir=$(cd "$3" && pwd); shift 3
 repo=$(cd "$(dirname "$0")/../../.." && pwd)
-tasks=("$@"); [ ${#tasks[@]} -eq 0 ] && tasks=($(ls "$repo/docs/experiments/tasks" | sed 's/\.md$//'))
+tasks=("$@"); [ ${#tasks[@]} -eq 0 ] && tasks=($(cd "$repo/docs/experiments/tasks" && ls *.md | sed 's/\.md$//'))
 # macOS has no timeout(1); fall back to gtimeout or a perl alarm wrapper.
 if command -v timeout >/dev/null; then cap() { timeout "$@"; }
 elif command -v gtimeout >/dev/null; then cap() { gtimeout "$@"; }
