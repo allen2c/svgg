@@ -1,0 +1,126 @@
+{
+  "owner": {
+    "create-night-fox-mascot-badge": {
+      "status": "ranked",
+      "order": [
+        "claude-opus",
+        "deepseek-v4.1-flash",
+        "claude-sonnet",
+        "claude-haiku",
+        "gpt-6-luna"
+      ]
+    },
+    "reference-heron-woodblock-print": {
+      "status": "ranked",
+      "order": [
+        "gpt-6-luna",
+        "claude-sonnet",
+        "claude-opus",
+        "deepseek-v4.1-flash",
+        "claude-haiku"
+      ]
+    },
+    "reference-nutmeg-botanical-sprig": {
+      "status": "ranked",
+      "order": [
+        "deepseek-v4.1-flash",
+        "claude-opus",
+        "claude-sonnet",
+        "gpt-6-luna",
+        "claude-haiku"
+      ]
+    },
+    "vectorize-marshall-point-lighthouse": {
+      "status": "ranked",
+      "order": [
+        "deepseek-v4.1-flash",
+        "gpt-6-luna",
+        "claude-opus",
+        "claude-haiku",
+        "claude-sonnet"
+      ]
+    },
+    "vectorize-teapot-product-photo": {
+      "status": "ranked",
+      "order": [
+        "deepseek-v4.1-flash",
+        "gpt-6-luna",
+        "claude-sonnet",
+        "claude-opus",
+        "claude-haiku"
+      ]
+    },
+    "vectorize-zion-national-park-poster": {
+      "status": "ranked",
+      "order": [
+        "claude-opus",
+        "deepseek-v4.1-flash",
+        "claude-haiku",
+        "gpt-6-luna",
+        "claude-sonnet"
+      ]
+    }
+  },
+  "orchestrator": {
+    "create-night-fox-mascot-badge": {
+      "status": "ranked",
+      "order": [
+        "claude-opus",
+        "claude-sonnet",
+        "claude-haiku",
+        "deepseek-v4.1-flash",
+        "gpt-6-luna"
+      ]
+    },
+    "vectorize-marshall-point-lighthouse": {
+      "status": "ranked",
+      "order": [
+        "deepseek-v4.1-flash",
+        "claude-sonnet",
+        "claude-opus",
+        "gpt-6-luna",
+        "claude-haiku"
+      ]
+    },
+    "vectorize-zion-national-park-poster": {
+      "status": "ranked",
+      "order": [
+        "claude-opus",
+        "deepseek-v4.1-flash",
+        "claude-sonnet",
+        "claude-haiku",
+        "gpt-6-luna"
+      ]
+    },
+    "vectorize-teapot-product-photo": {
+      "status": "ranked",
+      "order": [
+        "gpt-6-luna",
+        "deepseek-v4.1-flash",
+        "claude-opus",
+        "claude-haiku",
+        "claude-sonnet"
+      ]
+    },
+    "reference-nutmeg-botanical-sprig": {
+      "status": "ranked",
+      "order": [
+        "claude-opus",
+        "claude-sonnet",
+        "deepseek-v4.1-flash",
+        "claude-haiku",
+        "gpt-6-luna"
+      ]
+    },
+    "reference-heron-woodblock-print": {
+      "status": "ranked",
+      "order": [
+        "claude-opus",
+        "claude-sonnet",
+        "deepseek-v4.1-flash",
+        "claude-haiku",
+        "gpt-6-luna"
+      ]
+    }
+  }
+}

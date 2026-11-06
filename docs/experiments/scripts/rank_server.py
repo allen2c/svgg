@@ -15,20 +15,14 @@ outputs start in random order, so the ranking is blind.
 """
 import json
 import random
+import re
 import sys
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[3]
 TASKS_DIR = REPO / "docs/experiments/tasks"
-SOURCES = {  # task -> source image shown on the left, relative to the repo
-    "vectorize-marshall-point-lighthouse": "tmp/refs/lighthouse-marshall-point.jpg",
-    "reference-sunset-sailboat-tile": "tmp/refs/lighthouse-cape-may.jpg",
-    "edit-weather-card-to-night": "docs/experiments/fixtures/weather-card.svg",
-    "animate-weather-card": "docs/experiments/fixtures/weather-card.svg",
-    "edit-windmill-scene-to-winter": "docs/experiments/fixtures/windmill-scene.svg",
-    "animate-windmill-scene": "docs/experiments/fixtures/windmill-scene.svg",
-}
+SOURCE_PATTERN = re.compile(r"@@REPO@@/(\S+?\.(?:jpg|jpeg|png|webp|svg))")  # inputs named in a task prompt
 
 PAGE = """<!doctype html><html><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><title>SVG Ranking</title>
@@ -74,7 +68,7 @@ for (const t of data.tasks) {
   s.innerHTML = `<h2>${t.task}<span class="state" data-task="${t.task}">${t.status}</span><label class="tie"><input type="checkbox" ${t.status==='tie'?'checked':''}> indistinguishable (tie)</label></h2><p class="prompt"></p><div class="row"><div class="source"></div><div class="list" data-task="${t.task}"></div></div>`;
   s.querySelector('.prompt').textContent = t.prompt;
   const src = s.querySelector('.source');
-  src.innerHTML = t.source ? `<img src="/file/${t.source}">` : `<div class="text">No source image (create task).</div>`;
+  src.innerHTML = t.sources.length ? t.sources.map((p, i) => `<img src="/file/${p}" title="reference ${i + 1}" style="margin-bottom:6px">`).join('') : `<div class="text">No source image (create task).</div>`;
   const list = s.querySelector('.list');
   s.querySelector('.tie input').onchange = e => { state[t.task] = e.target.checked ? 'tie' : 'unranked'; save(); };
   for (const m of t.models) {
@@ -121,7 +115,7 @@ def build_data(run_dir):
             svg = run_dir / m / f"{task}.svg"
             entries.append({"model": m, "svg": str(svg.relative_to(REPO)) if svg.exists() else None})
         tasks.append({"task": task, "prompt": prompt.replace("@@REPO@@/", ""),
-                      "source": SOURCES.get(task), "models": entries,
+                      "sources": list(dict.fromkeys(SOURCE_PATTERN.findall(text))), "models": entries,
                       "status": entry.get("status", "unranked")})
     return {"tasks": tasks}
 
@@ -142,7 +136,7 @@ def main():
             if self.path.startswith("/file/"):
                 target = (REPO / self.path[6:].split("?")[0]).resolve()
                 if REPO in target.parents and target.is_file():
-                    kind = {".svg": "image/svg+xml", ".jpg": "image/jpeg", ".png": "image/png"}.get(target.suffix, "application/octet-stream")
+                    kind = {".svg": "image/svg+xml", ".jpg": "image/jpeg", ".png": "image/png", ".webp": "image/webp"}.get(target.suffix, "application/octet-stream")
                     self.send_response(200)
                     self.send_header("Content-Type", kind)
                     self.send_header("Cache-Control", "no-store")
