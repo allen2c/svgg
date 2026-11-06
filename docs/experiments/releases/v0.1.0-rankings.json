@@ -1,0 +1,114 @@
+{
+  "owner": {
+    "animate-weather-card": {
+      "status": "tie",
+      "order": [
+        "gpt-6-luna",
+        "deepseek-v4.1-flash",
+        "claude-opus",
+        "claude-sonnet",
+        "claude-haiku"
+      ]
+    },
+    "create-camera-outline-icon": {
+      "status": "ranked",
+      "order": [
+        "claude-opus",
+        "claude-sonnet",
+        "gpt-6-luna",
+        "deepseek-v4.1-flash",
+        "claude-haiku"
+      ]
+    },
+    "create-night-fox-mascot-badge": {
+      "status": "ranked",
+      "order": [
+        "claude-opus",
+        "claude-sonnet",
+        "deepseek-v4.1-flash",
+        "gpt-6-luna",
+        "claude-haiku"
+      ]
+    },
+    "edit-weather-card-to-night": {
+      "status": "tie",
+      "order": [
+        "claude-sonnet",
+        "claude-haiku",
+        "deepseek-v4.1-flash",
+        "claude-opus",
+        "gpt-6-luna"
+      ]
+    },
+    "reference-sunset-sailboat-tile": {
+      "status": "ranked",
+      "order": [
+        "claude-opus",
+        "claude-sonnet",
+        "gpt-6-luna",
+        "deepseek-v4.1-flash",
+        "claude-haiku"
+      ]
+    },
+    "vectorize-marshall-point-lighthouse": {
+      "status": "ranked",
+      "order": [
+        "deepseek-v4.1-flash",
+        "claude-opus",
+        "gpt-6-luna",
+        "claude-sonnet",
+        "claude-haiku"
+      ]
+    }
+  },
+  "orchestrator": {
+    "create-camera-outline-icon": {
+      "status": "ranked",
+      "order": [
+        "claude-opus",
+        "claude-haiku",
+        "gpt-6-luna",
+        "claude-sonnet",
+        "deepseek-v4.1-flash"
+      ]
+    },
+    "create-night-fox-mascot-badge": {
+      "status": "ranked",
+      "order": [
+        "claude-opus",
+        "claude-sonnet",
+        "gpt-6-luna",
+        "deepseek-v4.1-flash",
+        "claude-haiku"
+      ]
+    },
+    "vectorize-marshall-point-lighthouse": {
+      "status": "ranked",
+      "order": [
+        "deepseek-v4.1-flash",
+        "claude-opus",
+        "claude-sonnet",
+        "claude-haiku",
+        "gpt-6-luna"
+      ]
+    },
+    "reference-sunset-sailboat-tile": {
+      "status": "ranked",
+      "order": [
+        "claude-opus",
+        "gpt-6-luna",
+        "deepseek-v4.1-flash",
+        "claude-sonnet",
+        "claude-haiku"
+      ]
+    },
+    "edit-weather-card-to-night": {
+      "status": "tie",
+      "order": []
+    },
+    "animate-weather-card": {
+      "status": "tie",
+      "order": []
+    }
+  }
+}

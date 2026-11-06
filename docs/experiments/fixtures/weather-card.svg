@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200" width="320" height="200" role="img" aria-labelledby="title">
+  <title id="title">Weather card: sunny with a cloud</title>
+  <style>
+    .card { fill: #8ecae6; }
+    .sun { fill: #ffb703; }
+    .ray { stroke: #ffb703; stroke-width: 6; stroke-linecap: round; }
+    .cloud { fill: #ffffff; }
+    .label { fill: #023047; font-family: system-ui, sans-serif; font-weight: 700; }
+  </style>
+  <g id="background">
+    <rect class="card" x="0" y="0" width="320" height="200" rx="24"/>
+  </g>
+  <g id="sun">
+    <g id="sun-rays">
+      <line class="ray" x1="110" y1="30" x2="110" y2="44"/>
+      <line class="ray" x1="110" y1="136" x2="110" y2="150"/>
+      <line class="ray" x1="50" y1="90" x2="64" y2="90"/>
+      <line class="ray" x1="156" y1="90" x2="170" y2="90"/>
+      <line class="ray" x1="68" y1="48" x2="78" y2="58"/>
+      <line class="ray" x1="142" y1="122" x2="152" y2="132"/>
+      <line class="ray" x1="68" y1="132" x2="78" y2="122"/>
+      <line class="ray" x1="142" y1="58" x2="152" y2="48"/>
+    </g>
+    <circle id="sun-disc" class="sun" cx="110" cy="90" r="34"/>
+  </g>
+  <g id="cloud">
+    <rect class="cloud" x="120" y="100" width="120" height="44" rx="22"/>
+    <circle class="cloud" cx="160" cy="100" r="26"/>
+    <circle class="cloud" cx="200" cy="96" r="32"/>
+  </g>
+  <g id="text">
+    <text class="label" x="300" y="56" font-size="40" text-anchor="end">24°</text>
+    <text class="label" x="300" y="180" font-size="18" text-anchor="end">Sunny</text>
+  </g>
+</svg>
