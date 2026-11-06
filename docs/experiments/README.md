@@ -25,6 +25,12 @@ Each iteration runs every task in `tasks/` with each model:
 Reference photos are public images downloaded into `tmp/refs/` (sources and
 licenses listed in the daily log of the day they were added).
 
+## Task set cadence
+
+Keep a task set for two iterations so scores compare, then add or replace
+reference images for the next two. Tasks the owner marks `tie` move to
+`tasks/retired/`.
+
 ## Run an iteration
 
 ```bash

@@ -2,7 +2,7 @@
 name: svgg
 description: Draw, vectorize, edit, and animate clean, editable SVG directly as text. Use when asked for an icon, logo, badge, app tile, illustration, scene, or animation as SVG, when turning a reference image into vector art, or when changing or animating an existing SVG. Works in any agent, with or without file, image, or shell tools.
 metadata:
-  version: 0.3.0
+  version: 0.4.0
 ---
 
 # SVG Drawing
@@ -34,9 +34,11 @@ Asset type sets the defaults. Use the row that fits; the request overrides it.
 | UI icon | `0 0 24 24` | none | path coordinates within 2–22 (a 2 px stroke may ink to 1) | 1 (`currentColor`) | never |
 | Logo or mark | `0 0 256 256` | none | 8% | 1–3 | only if asked |
 | Badge, sticker, app tile | `0 0 512 512` | the badge or tile shape itself fills the viewBox | content 8% inside the shape | 3–6 | if asked |
+| Poster or print | `0 0 W H` of the target | paper tone, optional border | 4% | 4–10 inks | if asked, exact |
 | Illustration or scene | `0 0 W H` of the target | full bleed; shapes may run past the edge | none for background, 4% for subject | 6–16 | if asked |
 
 A color's shade and highlight tones and its gradient stops count as that one color.
+A badge's banner or ribbon may overlap its ring on purpose.
 
 ## 2. Brief
 
@@ -136,9 +138,21 @@ tiled wave or scallop band.
   15–40 shapes, larger in front, smaller toward the horizon, overlapping.
 - Generating coordinates with a script is fine if the shapes vary and sit
   in one named group.
-- Wrong: one path of identical bumps, `M0 80 q20 -20 40 0 q20 -20 40 0 q20 -20 40 0 ...`.
-  Right: 4 separate cloud masses of different widths, each with its own
-  shadow shape.
+- Wrong: one path of identical bumps, `M0 80 q20 -20 40 0 q20 -20 40 0 q20 -20 40 0 ...`,
+  or clouds made of visible circles. Right: 4 separate cloud masses of
+  different widths, each one path with an irregular top (recipe in section 6)
+  and its own shadow shape.
+
+**A reference's style wins.** When a reference has a style role, its traits
+override the volume and texture rules above: a screen print keeps flat ink
+areas, a woodblock repeats its curled wave crests by design. Apply the style
+to **every** element, not only the main subject: if the style has dark
+outlines, every shape gets them, the background and the waves included.
+
+**Finish.** Detail is what makes a drawing look finished. After the main
+masses read correctly, add detail where the eye goes: railing bars and
+braces, window panes, foam motifs, leaf veins, small highlights, painted
+motifs on an object. Keep it in its own groups.
 
 **Style**
 
@@ -146,14 +160,17 @@ tiled wave or scallop band.
   `stroke-linejoin="round"`, `fill="none"` on the root. Inner lines must
   not cross outlines they should stop at: a camera's top bump is one
   outline with the body, not a separate box drawn across it.
-- Flat art: solid fills, at most 2 gradients, no filters unless asked.
-  Shadows are flat darker shapes.
+- Flat art: solid fills, at most 2 gradients (4 for glossy products such as
+  glaze or metal), no filters unless asked. Shadows are flat darker shapes.
 - Text: only when asked, exact wording and case, `font-family="system-ui,
   sans-serif"` (or a generic `serif`/`monospace` that matches the source),
-  `text-anchor="middle"` for centered text, legible at display size. To fit a
-  line to a measured width, set `textLength` and
-  `lengthAdjust="spacingAndGlyphs"`; use `letter-spacing` for spaced
-  capitals.
+  `text-anchor="middle"` for centered text, legible at display size.
+- Fitting text to a measured width: set `font-size` (a capital in a sans
+  face is about 0.65 em wide, a lowercase letter about 0.55 em) and
+  `letter-spacing`, then check the render. For wide display type, wrap the
+  text in a group with `transform="translate(x y) scale(1.3 1)"`. Do not
+  rely on `textLength` or `textPath`: browsers honor them, but
+  `rsvg-convert` ignores both.
 
 **Forbidden**
 
@@ -169,8 +186,9 @@ metadata (`sodipodi`, `inkscape`, timestamp comments).
   same subject position and size.
 - Colors: 6–16 for a scene. Average a small patch when you can read pixels
   (e.g. `magick img.jpg -crop 16x16+X+Y -resize 1x1 txt:`); otherwise
-  estimate carefully. Keep the photo's most saturated region (e.g. blue sky)
-  visibly saturated.
+  estimate carefully. Sample flat areas only, never text, edges, or busy
+  pattern; take 2–3 patches per color and keep the cleanest. For a faded
+  print or scan, push colors back toward clean ink.
 - Plan color bands top to bottom with their y ranges before drawing.
 - Drop noise and texture below about 1/60 of the width. One group per
   region of meaning (`sky`, `clouds`, `sea`, `trees`, `lighthouse`, `rocks`).
@@ -190,6 +208,12 @@ type, then keep the traits that make it that type:
 When a reference has a style role, write 3–5 style traits into the brief
 (e.g. "Prussian blue and indigo, cream paper, dark blue outlines, foam as
 white dots, wave crests as claws") and check each one at the end.
+
+When a reference has a pose or silhouette role, measure the subject's
+bounding box and key points in the reference as fractions (head, neck base,
+wing tips, feet), decide where the subject's box sits in your canvas, and
+map each point into it. Keep the body proportions (head : neck : body :
+legs) from the reference.
 
 **edit**
 
@@ -244,8 +268,25 @@ white dots, wave crests as claws") and check each one at the end.
   it with a group transform. Alternative: a `<mask>` with a black inner circle.
 - **Four-point star:** `polygon` with 8 points alternating outer radius R
   and inner radius 0.35 R, starting at the top.
-- **Cloud:** a rounded `rect` base (`rx` = height / 2) plus 2–3 circles of
-  different radii on top, all the same fill.
+- **Icon cloud:** a rounded `rect` base (`rx` = height / 2) plus 2–3 circles
+  of different radii on top, all the same fill. Icons only.
+- **Scene cloud:** one path per mass with a flat-ish bottom and 3–6 bumps of
+  different sizes on top, plus a shadow path along the bottom:
+  `M10 90 C0 70 20 52 40 60 C42 30 80 22 96 44 C108 20 150 24 152 54 C176 48 190 72 176 90 Z`
+  with shadow `M14 90 C40 80 70 84 96 78 C126 72 156 80 176 90 Z`.
+- **Tube (spout, handle, stem, neck):** the same center path stroked twice,
+  first wide and dark for the outline, then 4 units narrower in the fill
+  color, `stroke-linecap="round"`, `fill="none"`.
+- **Leaf with veins:** the blade as one path from base to tip with two `C`
+  segments (widest at about 40% from the base for most leaves), a midrib
+  `Q` curve, and 3–5 side veins per side inside a group clipped by the blade
+  (`clipPath`), so veins never cross the outline.
+- **Rock field:** rows from back to front; each rock a 5–7 point polygon,
+  width growing toward the viewer, with a lighter top face and a darker
+  side face; vary sizes by ±40%; overlap neighbors.
+- **Curved banner text:** a `textPath` renders only in browsers. For a file
+  that must render everywhere, place each letter as its own `<text>` with
+  `transform="rotate(A cx cy)"` stepping along the arc.
 - **Text inside a circle** of radius r: a straight line at distance d from
   the center has room for width 2·√(r² − d²); keep text under 80% of that.
 - **Rounded tile:** `rect` with `rx` ≈ 22% of the side; clip the scene to it
@@ -256,7 +297,11 @@ white dots, wave crests as claws") and check each one at the end.
 ## 7. Check
 
 Check the SVG, fix, and check again; at most two repair rounds. If a
-problem remains, deliver anyway and name it in the report.
+problem remains, deliver anyway and name it in the report. Budget: about
+6 renders per asset in total; after that, deliver and list what is still
+open instead of starting another round. Repair in this
+order: composition and silhouette, then text, then tone and color, then
+detail.
 
 1. **Valid**: well-formed XML, `xmlns`, `viewBox`, unique ids, nothing forbidden.
 2. **Frame**: every shape inside the viewBox and margins.
@@ -283,6 +328,8 @@ With tools, verify rather than guess:
 - Compare with the source: render at the source's size and put both side
   by side in one image (e.g. `magick source.jpg render.png +append
   compare.png`), then check proportions, masses, and colors item by item.
+  For proportions, also blend them at 50%: `magick source.jpg render.png
+  -resize WxH! -compose blend -define compose:args=50 -composite overlay.png`.
 - Motion: a static renderer shows only frame 0. In a headless browser,
   inline the SVG in an HTML page and seek every animation with
   `for (const a of document.getAnimations()) { a.pause(); a.currentTime = 2000; }`,
